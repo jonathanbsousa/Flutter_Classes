@@ -10,7 +10,7 @@ void main() {
     "Lanca de Jade",
   ];
 
-  bool condition = true;
+  bool continuarComprando = true;
   double total = 0;
 
   do {
@@ -34,7 +34,11 @@ void main() {
     }
 
     print("Digite o valor do item desejado: ");
-    double valor = double.parse(stdin.readLineSync()!);
+    double valor = double.tryParse(stdin.readLineSync()!) ?? -1;
+    if (valor <= 0) {
+      print("Valor inválido!");
+      continue;
+    }
 
     print("Produto: $input\nValor: R\$ ${valor.toStringAsFixed(2)}");
     props.remove(input);
@@ -43,35 +47,40 @@ void main() {
     print("Deseja continuar comprando? (S/N): ");
     String opcao = stdin.readLineSync()!;
     if (opcao.trim().toLowerCase() == "n") {
-      condition = false;
+      continuarComprando = false;
     }
-  } while (condition);
 
+  } while (continuarComprando);
+
+  bool pagamentoValido = false;
   int op = 0;
+
   do {
     print("\nDigite a forma de pagamento:");
     print("1 - Dinheiro");
     print("2 - Cartão de Crédito");
     print("3 - Pix");
     print("Opção: ");
-    op = int.parse(stdin.readLineSync()!);
+    op = int.tryParse(stdin.readLineSync()!) ?? 0;
 
-    switch (op) {
-      case 1:
-        print("Pagamento em Dinheiro selecionado.");
-        break;
-      case 2:
-        print("Pagamento com Cartão de Crédito selecionado.");
-        break;
-      case 3:
-        print("Pagamento via Pix selecionado.");
-        break;
-      default:
-        print("Opção inválida. Tente novamente.");
-        continue;
+    if (op >= 1 && op <= 3) {
+      pagamentoValido = true;
+      switch (op) {
+        case 1:
+          print("Pagamento em Dinheiro selecionado.");
+          break;
+        case 2:
+          print("Pagamento com Cartão de Crédito selecionado.");
+          break;
+        case 3:
+          print("Pagamento via Pix selecionado.");
+          break;
+      }
+    } else {
+      print("Opção inválida. Tente novamente.");
     }
-    break; // Sai do loop se a opção for válida
-  } while (true);
+
+  } while (!pagamentoValido);
 
   print("\nCompra finalizada!");
   print("Valor total da compra: R\$ ${total.toStringAsFixed(2)}");
