@@ -4,26 +4,28 @@ void main() {
   String op = "";
 
   do {
-    try {
-      print("==========BEM-VINDO==========");
+    String nome = "";
+
+    // Garantir que o nome seja válido
+    while (true) {
       stdout.write("Digite seu nome completo: ");
-      String? nome = stdin.readLineSync()!;
+      String? entrada = stdin.readLineSync();
 
-      if (nome.trim().isEmpty) {
-        print("Entrada invalida!");
-        continue;
+      if (entrada == null || entrada.trim().isEmpty) {
+        print("Nome inválido!");
+      } else {
+        nome = entrada.trim();
+        break;
       }
-    } on FormatException {
-      print("Escreva um opção valida!");
-    } catch (e) {
-      print("Entrada invalida");
     }
 
-    print("Gostária de cadastrar mas uma pessoa?(S/N)");
-    op = stdin.readLineSync()!;
+    print("Cliente cadastrado: $nome");
 
-    if (op.toLowerCase() == "n") {
-      op = "n";
-    }
+    // Perguntar se deseja cadastrar outra pessoa
+    stdout.write("Gostaria de cadastrar mais uma pessoa? (S/N): ");
+    op = (stdin.readLineSync() ?? "n").toLowerCase();
+
   } while (op != "n");
+
+  print("\n👋 Cadastro finalizado!");
 }
