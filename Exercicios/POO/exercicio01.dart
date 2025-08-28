@@ -10,8 +10,8 @@ class Produto {
 
   int subtrairEstoque(){
     print("Diminuindo estoque...");
-    int total = this.estoque - 1;
-    return total; 
+    this.estoque -= 1;
+    return this.estoque; 
   }
 
 }
