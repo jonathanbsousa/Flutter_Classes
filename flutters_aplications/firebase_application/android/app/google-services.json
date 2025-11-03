@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "364846661731",
+    "project_id": "dbapp-f19ee",
+    "storage_bucket": "dbapp-f19ee.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:364846661731:android:6377d40e8398a29ab8b856",
+        "android_client_info": {
+          "package_name": "com.dbapp.firebase_application"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyATrk0wrPLbusxEx3f5I868iRBRo4PtXIw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

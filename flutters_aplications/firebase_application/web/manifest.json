@@ -1,6 +1,6 @@
 {
-    "name": "firabase_application",
-    "short_name": "firabase_application",
+    "name": "firebase_application",
+    "short_name": "firebase_application",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
