@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "929157236680",
+    "project_id": "grimoriaapp",
+    "storage_bucket": "grimoriaapp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:929157236680:android:068624eac2c45819b062fd",
+        "android_client_info": {
+          "package_name": "com.grimoriaapp.grimoria_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAgVmbpmQC5_LhQfrsIuc0wL9VXLgTmN18"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

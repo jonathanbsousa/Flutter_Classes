@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'DeletePage.dart';
 
 class PostPage extends StatefulWidget {
   const PostPage({super.key});
@@ -48,7 +49,10 @@ class _PostPageState extends State<PostPage> {
                     TextField(
                       controller: novaTemperatura,
                     ),
-                    ElevatedButton(onPressed: postValue, child: Text("Enviar Dados"))
+                    ElevatedButton(onPressed: postValue, child: Text("Enviar Dados")),
+                    ElevatedButton(onPressed: (){
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => DeletePage()));
+                    }, child: Text("Delete Page"))
                   ],
                 ),
               )
