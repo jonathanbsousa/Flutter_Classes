@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'firebase_options.dart';
 import 'core/services/auth_service.dart';
 import 'core/theme/app_theme.dart';
@@ -31,7 +32,7 @@ class RpgManagerApp extends StatelessWidget {
       home: const AuthWrapper(),
       routes: {
         '/login': (context) => const LoginScreen(),
-        '/home': (context) => const HomeScreen(),
+        '/home': (context) => const MainScreen(),
         '/profile': (context) => const ProfileScreen(),
         '/campaigns': (context) => const CampaignsListScreen(),
         '/tools': (context) => const ToolsScreen(),
@@ -50,15 +51,20 @@ class RpgManagerApp extends StatelessWidget {
   }
 }
 
-class AuthWrapper extends StatelessWidget {
+class AuthWrapper extends StatefulWidget {
   const AuthWrapper({super.key});
 
   @override
+  State<AuthWrapper> createState() => _AuthWrapperState();
+}
+
+class _AuthWrapperState extends State<AuthWrapper> {
+  final AuthService _authService = AuthService();
+
+  @override
   Widget build(BuildContext context) {
-    final authService = AuthService();
-    
-    return StreamBuilder(
-      stream: authService.authStateChanges,
+    return StreamBuilder<User?>(
+      stream: _authService.authStateChanges,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
@@ -70,7 +76,7 @@ class AuthWrapper extends StatelessWidget {
         
         if (snapshot.hasData && snapshot.data != null) {
           // User is logged in, show main app
-          return const MainScreen();
+          return MainScreen(key: UniqueKey());
         } else {
           // User is not logged in, show login screen
           return const LoginScreen();
@@ -118,6 +124,13 @@ class _MainScreenState extends State<MainScreen> {
     super.dispose();
   }
 
+  void _onTabTapped(int index) {
+    setState(() {
+      _currentIndex = index;
+      _pageController.jumpToPage(index);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -126,71 +139,32 @@ class _MainScreenState extends State<MainScreen> {
         physics: const NeverScrollableScrollPhysics(),
         children: _screens,
       ),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: const Color(0xFF1E1E1E),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.3),
-              blurRadius: 10,
-              offset: const Offset(0, -2),
-            ),
-          ],
-        ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: List.generate(_icons.length, (index) {
-                final isSelected = _currentIndex == index;
-                return GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _currentIndex = index;
-                      _pageController.jumpToPage(index);
-                    });
-                  },
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: isSelected 
-                          ? const Color(0xFFE53935).withOpacity(0.2)
-                          : Colors.transparent,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          _icons[index],
-                          color: isSelected 
-                              ? const Color(0xFFE53935)
-                              : Colors.grey[400],
-                          size: 24,
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          _titles[index],
-                          style: TextStyle(
-                            color: isSelected 
-                                ? const Color(0xFFE53935)
-                                : Colors.grey[400],
-                            fontSize: 12,
-                            fontWeight: isSelected 
-                                ? FontWeight.bold 
-                                : FontWeight.normal,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              }),
-            ),
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _currentIndex,
+        onDestinationSelected: _onTabTapped,
+        // O estilo visual foi definido no ThemeData acima para manter o código limpo
+        destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.home_outlined),
+            selectedIcon: Icon(Icons.home),
+            label: 'Início',
           ),
-        ),
+          NavigationDestination(
+            icon: Icon(Icons.groups_outlined),
+            selectedIcon: Icon(Icons.groups),
+            label: 'Campanhas',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.casino_outlined),
+            selectedIcon: Icon(Icons.casino),
+            label: 'Ferramentas',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.person_outline),
+            selectedIcon: Icon(Icons.person),
+            label: 'Perfil',
+          ),
+        ],
       ),
     );
   }

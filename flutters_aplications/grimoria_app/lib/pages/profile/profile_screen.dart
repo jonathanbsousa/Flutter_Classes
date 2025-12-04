@@ -24,6 +24,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void initState() {
     super.initState();
     _loadUserData();
+    // Listen to auth state changes
+    _authService.authStateChanges.listen((user) {
+      if (mounted) {
+        _loadUserData();
+      }
+    });
   }
 
   @override
@@ -33,6 +39,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _loadUserData() async {
+    if (!mounted) return;
+    
+    setState(() => _isLoading = true);
+    
     try {
       final user = _authService.currentUser;
       if (user != null) {
@@ -44,6 +54,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
             _isLoading = false;
           });
         }
+      } else {
+        setState(() {
+          _currentUser = null;
+          _isLoading = false;
+        });
       }
     } catch (e) {
       if (mounted) {

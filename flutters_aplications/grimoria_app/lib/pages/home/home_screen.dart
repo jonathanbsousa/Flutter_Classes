@@ -24,9 +24,25 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _loadUserData();
+    // Listen to auth state changes
+    _authService.authStateChanges.listen((user) {
+      if (mounted) {
+        _loadUserData();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    // Clean up any listeners
+    super.dispose();
   }
 
   Future<void> _loadUserData() async {
+    if (!mounted) return;
+    
+    setState(() => _isLoading = true);
+    
     try {
       final user = _authService.currentUser;
       if (user != null) {
@@ -37,6 +53,11 @@ class _HomeScreenState extends State<HomeScreen> {
           });
           await _loadCampaigns(userModel);
         }
+      } else {
+        setState(() {
+          _currentUser = null;
+          _campaigns = [];
+        });
       }
     } catch (e) {
       if (mounted) {
@@ -56,18 +77,20 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _loadCampaigns(UserModel user) async {
     try {
-      List<CampaignModel> campaigns = [];
+      // 1. Busque campanhas onde o usuário é Mestre
+      final masterCampaigns = await _firestoreService.getCampaignsByMaster(user.id);
       
-      if (user.isMaster) {
-        // Load campaigns where user is master
-        campaigns = await _firestoreService.getCampaignsByMaster(user.id);
-      } else {
-        // Load campaigns where user is player
-        campaigns = await _firestoreService.getCampaignsByPlayer(user.id);
-      }
+      // 2. Busque campanhas onde o usuário é Jogador
+      final playerCampaigns = await _firestoreService.getCampaignsByPlayer(user.id);
+
+      // 3. Combine as listas usando um Set para evitar duplicatas 
+      // (caso o mestre tenha se adicionado como jogador para testes)
+      final Set<CampaignModel> uniqueCampaigns = {};
+      uniqueCampaigns.addAll(masterCampaigns);
+      uniqueCampaigns.addAll(playerCampaigns);
 
       setState(() {
-        _campaigns = campaigns;
+        _campaigns = uniqueCampaigns.toList();
       });
     } catch (e) {
       if (mounted) {

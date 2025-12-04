@@ -25,9 +25,25 @@ class _CampaignsListScreenState extends State<CampaignsListScreen> {
   void initState() {
     super.initState();
     _loadUserData();
+    // Listen to auth state changes
+    _authService.authStateChanges.listen((user) {
+      if (mounted) {
+        _loadUserData();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    // Clean up any listeners
+    super.dispose();
   }
 
   Future<void> _loadUserData() async {
+    if (!mounted) return;
+    
+    setState(() => _isLoading = true);
+    
     try {
       final user = _authService.currentUser;
       if (user != null) {
@@ -38,6 +54,11 @@ class _CampaignsListScreenState extends State<CampaignsListScreen> {
           });
           await _loadCampaigns();
         }
+      } else {
+        setState(() {
+          _currentUser = null;
+          _campaigns = [];
+        });
       }
     } catch (e) {
       if (mounted) {
@@ -56,23 +77,27 @@ class _CampaignsListScreenState extends State<CampaignsListScreen> {
   }
 
   Future<void> _loadCampaigns() async {
+    if (_currentUser == null) return;
+
     try {
       List<CampaignModel> campaigns = [];
       
       switch (_selectedFilter) {
-        case 0: // All
-          if (_currentUser?.isMaster == true) {
-            campaigns = await _firestoreService.getCampaignsByMaster(_currentUser!.id);
-          } else {
-            campaigns = await _firestoreService.getCampaignsByPlayer(_currentUser!.id);
-          }
+        case 0: // Todas (Mestre + Jogador)
+          final asMaster = await _firestoreService.getCampaignsByMaster(_currentUser!.id);
+          final asPlayer = await _firestoreService.getCampaignsByPlayer(_currentUser!.id);
+          
+          final Set<CampaignModel> uniqueCampaigns = {};
+          uniqueCampaigns.addAll(asMaster);
+          uniqueCampaigns.addAll(asPlayer);
+          campaigns = uniqueCampaigns.toList();
           break;
-        case 1: // Master
-          if (_currentUser?.isMaster == true) {
-            campaigns = await _firestoreService.getCampaignsByMaster(_currentUser!.id);
-          }
+
+        case 1: // Apenas como Mestre
+          campaigns = await _firestoreService.getCampaignsByMaster(_currentUser!.id);
           break;
-        case 2: // Player
+
+        case 2: // Apenas como Jogador
           campaigns = await _firestoreService.getCampaignsByPlayer(_currentUser!.id);
           break;
       }
