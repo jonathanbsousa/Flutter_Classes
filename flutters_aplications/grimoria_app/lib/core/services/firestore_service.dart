@@ -29,7 +29,11 @@ class FirestoreService {
     try {
       final doc = await _firestore.collection('users').doc(userId).get();
       if (doc.exists) {
-        return UserModel.fromJson(doc.data()!);
+        // CORREÇÃO: Pegamos os dados e INJETAMOS o ID do documento neles
+        Map<String, dynamic> data = doc.data()!;
+        data['id'] = doc.id;
+
+        return UserModel.fromJson(data);
       }
       return null;
     } catch (e) {
@@ -76,8 +80,13 @@ class FirestoreService {
           .collection('campaigns')
           .where('masterId', isEqualTo: masterId)
           .get();
-      
-      return snapshot.docs.map((doc) => CampaignModel.fromJson(doc.data())).toList();
+
+      return snapshot.docs.map((doc) {
+        // CORREÇÃO: Injetar ID do documento antes de converter
+        Map<String, dynamic> data = doc.data();
+        data['id'] = doc.id;
+        return CampaignModel.fromJson(data);
+      }).toList();
     } catch (e) {
       print('Error getting campaigns by master: $e');
       return [];
@@ -90,8 +99,13 @@ class FirestoreService {
           .collection('campaigns')
           .where('playerIds', arrayContains: playerId)
           .get();
-      
-      return snapshot.docs.map((doc) => CampaignModel.fromJson(doc.data())).toList();
+
+      return snapshot.docs.map((doc) {
+        // CORREÇÃO: Injetar ID do documento
+        Map<String, dynamic> data = doc.data();
+        data['id'] = doc.id;
+        return CampaignModel.fromJson(data);
+      }).toList();
     } catch (e) {
       print('Error getting campaigns by player: $e');
       return [];

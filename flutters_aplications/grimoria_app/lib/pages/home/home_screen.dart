@@ -76,27 +76,57 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _loadCampaigns(UserModel user) async {
-    try {
-      // 1. Busque campanhas onde o usuário é Mestre
-      final masterCampaigns = await _firestoreService.getCampaignsByMaster(user.id);
-      
-      // 2. Busque campanhas onde o usuário é Jogador
-      final playerCampaigns = await _firestoreService.getCampaignsByPlayer(user.id);
+    print("--- INICIANDO DEBUG DE CAMPANHAS ---");
+    print("1. ID do Usuário Logado (Auth/User): ${user.id}");
 
-      // 3. Combine as listas usando um Set para evitar duplicatas 
-      // (caso o mestre tenha se adicionado como jogador para testes)
+    try {
+      // Teste de conexão: Busca TODAS as campanhas sem filtro
+      final allCampaigns = await _firestoreService.getAllCampaigns();
+      print(
+        "2. Total de campanhas no banco (sem filtro): ${allCampaigns.length}",
+      );
+
+      if (allCampaigns.isNotEmpty) {
+        print(
+          "   -> ID do Mestre da primeira campanha encontrada: '${allCampaigns.first.masterId}'",
+        );
+        print("   -> ID do Usuário sendo comparado:              '${user.id}'");
+        print(
+          "   -> Os IDs são iguais? ${allCampaigns.first.masterId == user.id}",
+        );
+      }
+
+      // Busca filtrada (Onde o erro lógico deve estar)
+      print("3. Buscando campanhas onde masterId == ${user.id}...");
+      final masterCampaigns = await _firestoreService.getCampaignsByMaster(
+        user.id,
+      );
+      print("   -> Encontradas como Mestre: ${masterCampaigns.length}");
+
+      print("4. Buscando campanhas onde playerIds contem ${user.id}...");
+      final playerCampaigns = await _firestoreService.getCampaignsByPlayer(
+        user.id,
+      );
+      print("   -> Encontradas como Jogador: ${playerCampaigns.length}");
+
       final Set<CampaignModel> uniqueCampaigns = {};
       uniqueCampaigns.addAll(masterCampaigns);
       uniqueCampaigns.addAll(playerCampaigns);
 
+      print("5. Total final para exibir: ${uniqueCampaigns.length}");
+
       setState(() {
         _campaigns = uniqueCampaigns.toList();
       });
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print("!!! ERRO CRÍTICO !!!");
+      print("Erro: $e");
+      print("Stack: $stackTrace");
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erro ao carregar campanhas: ${e.toString()}'),
+            content: Text('Erro Debug: $e'),
             backgroundColor: Colors.red,
           ),
         );

@@ -140,8 +140,7 @@ class _CreateCampaignScreenState extends State<CreateCampaignScreen> {
         characterIds: [], // Adicionado para corrigir o erro
         status: 'Empty',
         statusColor: '#FF9800',
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
+        createdAt: DateTime.now()
       );
 
       await _firestoreService.createCampaign(campaign);

@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 import 'character_model.dart';
 
 class CampaignModel {
@@ -12,7 +14,6 @@ class CampaignModel {
   final String status;
   final String statusColor;
   final DateTime? createdAt;
-  final DateTime? updatedAt;
 
   CampaignModel({
     required this.id,
@@ -25,12 +26,27 @@ class CampaignModel {
     required this.characterIds,
     required this.status,
     required this.statusColor,
-    this.createdAt,
-    this.updatedAt,
+    this.createdAt
   });
 
   // Create from JSON (Firestore document)
   factory CampaignModel.fromJson(Map<String, dynamic> json) {
+
+    DateTime? safeDate(dynamic value) {
+      if (value == null) return null;
+      if (value is int) return DateTime.fromMillisecondsSinceEpoch(value);
+      if (value is Timestamp) return value.toDate(); // Trata o formato do Firebase
+      return null;
+    }
+    
+    List<String> safeList(dynamic value) {
+      if (value == null) return [];
+      if (value is List) {
+        return value.map((e) => e.toString()).toList();
+      }
+      return [];
+    }
+
     return CampaignModel(
       id: json['id'] ?? '',
       title: json['title'] ?? '',
@@ -38,16 +54,11 @@ class CampaignModel {
       code: json['code'] ?? '',
       masterId: json['masterId'] ?? '',
       masterName: json['masterName'] ?? '',
-      playerIds: List<String>.from(json['playerIds'] ?? []),
-      characterIds: List<String>.from(json['characterIds'] ?? []),
+      playerIds: safeList(json['playerIds']),
+      characterIds: safeList(json['characterIds']),
       status: json['status'] ?? 'Empty',
       statusColor: json['statusColor'] ?? '#FF9800',
-      createdAt: json['createdAt'] != null
-          ? DateTime.fromMillisecondsSinceEpoch(json['createdAt'])
-          : null,
-      updatedAt: json['updatedAt'] != null
-          ? DateTime.fromMillisecondsSinceEpoch(json['updatedAt'])
-          : null,
+      createdAt: safeDate(json['createdAt']),
     );
   }
 
@@ -64,8 +75,7 @@ class CampaignModel {
       'characterIds': characterIds,
       'status': status,
       'statusColor': statusColor,
-      'createdAt': createdAt?.millisecondsSinceEpoch,
-      'updatedAt': updatedAt?.millisecondsSinceEpoch,
+      'createdAt': createdAt?.millisecondsSinceEpoch
     };
   }
 
@@ -81,8 +91,7 @@ class CampaignModel {
     List<String>? characterIds,
     String? status,
     String? statusColor,
-    DateTime? createdAt,
-    DateTime? updatedAt,
+    DateTime? createdAt
   }) {
     return CampaignModel(
       id: id ?? this.id,
@@ -95,8 +104,7 @@ class CampaignModel {
       characterIds: characterIds ?? this.characterIds,
       status: status ?? this.status,
       statusColor: statusColor ?? this.statusColor,
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
+      createdAt: createdAt ?? this.createdAt
     );
   }
 
@@ -137,7 +145,6 @@ class CampaignModel {
     return copyWith(
       status: newStatus,
       statusColor: newStatusColor,
-      updatedAt: DateTime.now(),
     );
   }
 
@@ -170,8 +177,7 @@ class CampaignModel {
 
     return copyWith(
       status: newStatus,
-      statusColor: newStatusColor,
-      updatedAt: DateTime.now(),
+      statusColor: newStatusColor
     );
   }
 
